@@ -1,13 +1,12 @@
 import Koa, { Context} from 'koa';
 import koaBody from 'koa-body';
 import Router from 'koa-router';
-import logger from 'koa-logger';
+import log4js from "log4js";
 import process from 'process';
 import { routerTask } from './resources/task/task.router';
 import { routerBoard } from './resources/board/board.router';
 import { router } from './resources/users/user.router';
 import { createWriteStream } from 'fs';
-import morgan from 'koa-morgan';
 import path from 'path';
 
 export const app = new Koa();
@@ -17,33 +16,14 @@ rootRouter.get('/', (ctx:Context) => {
   ctx.body = "Service is running!";
 })
 
-// const swaggerDocument = swagger.loadDocumentSync(path.join(__dirname, '../doc/api.yaml'));
-// app
-//   .use(ui(swaggerDocument, "/swagger"))
-
-// app.use(logger((str, args) => {
-//   console.log(str, args);
-// }))
 const accessLogStream = createWriteStream(__dirname + '/access.log')
 
-// app.use(logger({
-//   transporter: (str, args) => {
-//     console.log(str, args);
-//   }
-// }))
 
-// setup the logger
-// app.use(morgan('tiny', { stream: accessLogStream }))
+let logger = log4js.getLogger();
+logger.level = "debug";
+logger.debug("Some debug messages");
 
-// log only 4xx and 5xx responses to console
-app.use(morgan('tiny', {
-  skip: function (req, res) { return res.statusCode < 400 }
-}))
 
-// log all requests to access.log
-app.use(morgan('tiny', {
-  stream: createWriteStream(path.join(__dirname, 'access.log'))
-}))
 
 app.use(koaBody())
   .use(rootRouter.routes())
