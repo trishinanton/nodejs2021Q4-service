@@ -5,7 +5,7 @@ import  obj  from '../common/config';
 
 const logger = async (ctx: Context | null, next: Next | null):Promise<void | log4js.Logger> => {
 
-  const allLogger = log4js.getLogger('out');
+  const allLogger = log4js.getLogger('info');
   const errorLogger = log4js.getLogger('errors');
 
   if (ctx && next) {
@@ -25,6 +25,12 @@ const logger = async (ctx: Context | null, next: Next | null):Promise<void | log
 
       if (Number(obj.LOG_LEVEL)>0) {
         allLogger.warn(output)
+      }
+    }
+    else if (status >= 200) {
+
+      if (Number(obj.LOG_LEVEL)>1) {
+        allLogger.debug(output)
       }
     }
 

@@ -8,6 +8,8 @@ import { routerBoard } from './resources/board/board.router';
 import { router } from './resources/users/user.router';
 import { createWriteStream } from 'fs';
 import path from 'path';
+import { logger } from './logger/middleWair';
+import bodyParser from 'koa-body';
 
 export const app = new Koa();
 const rootRouter = new Router();
@@ -19,13 +21,11 @@ rootRouter.get('/', (ctx:Context) => {
 const accessLogStream = createWriteStream(__dirname + '/access.log')
 
 
-let logger = log4js.getLogger();
-logger.level = "debug";
-logger.debug("Some debug messages");
-
-
-
-app.use(koaBody())
+app.use(bodyParser())
+  .use( ( ctx: Koa.Context, next:Koa.Next ) => {
+      logger(ctx, next)
+    }
+  )
   .use(rootRouter.routes())
   .use(rootRouter.allowedMethods())
   .use(router.routes())

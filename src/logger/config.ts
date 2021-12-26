@@ -8,12 +8,10 @@ const errorsLogsPath = path.join(logsFolder, '/errors-logs.log');
 
 log4js.configure({
   appenders: {
-    // all logs
     all: {
       type: 'file',
       filename: allLogsPath
     },
-    // errors logs
     errors: {
       type: 'file',
       filename: errorsLogsPath
