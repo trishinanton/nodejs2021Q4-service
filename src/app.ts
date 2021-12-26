@@ -38,9 +38,11 @@ app.use(bodyParser())
 process
   .on('unhandledRejection', (reason, p) => {
     console.error(reason, 'Unhandled Rejection at Promise', p);
+    logger(null, null);
   })
   .on('uncaughtException', err => {
     console.error(err, 'Uncaught Exception thrown');
+    logger(null, null);
     process.exit(1);
   });
 
