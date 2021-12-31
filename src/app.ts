@@ -25,6 +25,7 @@ app.use(bodyParser())
   .use( ( ctx: Koa.Context, next:Koa.Next ) => {
       logger(ctx, next)
     }
+
   )
   .use(rootRouter.routes())
   .use(rootRouter.allowedMethods())
