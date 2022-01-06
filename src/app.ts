@@ -1,15 +1,12 @@
 import Koa, { Context} from 'koa';
-import koaBody from 'koa-body';
 import Router from 'koa-router';
-import log4js from "log4js";
 import process from 'process';
+import { createWriteStream } from 'fs';
+import bodyParser from 'koa-body';
 import { routerTask } from './resources/task/task.router';
 import { routerBoard } from './resources/board/board.router';
 import { router } from './resources/users/user.router';
-import { createWriteStream } from 'fs';
-import path from 'path';
 import { logger } from './logger/middleWair';
-import bodyParser from 'koa-body';
 
 export const app = new Koa();
 const rootRouter = new Router();
@@ -18,7 +15,7 @@ rootRouter.get('/', (ctx:Context) => {
   ctx.body = "Service is running!";
 })
 
-const accessLogStream = createWriteStream(__dirname + '/access.log')
+const accessLogStream = createWriteStream(`${__dirname  }/access.log`)
 
 
 app.use(bodyParser())
