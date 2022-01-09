@@ -7,12 +7,13 @@
   },
   "type": "commonjs",
   "description": "REST service starter for RS School",
-  "main": "src/server.js",
+  "main": "src/server.ts",
   "scripts": {
-    "start": "nodemon src/server.js",
+    "start": "nodemon --exec npx ts-node src/server.ts",
     "lint": "eslint --ext .js,.ts --fix src/",
     "test": "cross-env DEBUG=rs:* jest --testMatch \"<rootDir>/test/e2e/test/*.test.js\" --noStackTrace --runInBand",
-    "test:auth": "cross-env DEBUG=rs:* TEST_MODE=auth jest --noStackTrace"
+    "test:auth": "cross-env DEBUG=rs:* TEST_MODE=auth jest --noStackTrace",
+    "ts-doc": "typedoc --out docs"
   },
   "keywords": [
     "rs",
@@ -44,18 +45,47 @@
     ]
   },
   "dependencies": {
+    "and": "^0.0.3",
+    "babel-eslint": "^10.1.0",
     "cross-env": "7.0.3",
     "dotenv": "10.0.0",
     "express": "4.17.1",
-    "swagger-ui-express": "4.1.6",
+    "koa": "^2.13.4",
+    "koa-body": "^4.2.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-json": "^2.0.2",
+    "koa-log4": "^2.3.2",
+    "koa-logger": "^3.2.1",
+    "koa-morgan": "^1.0.1",
+    "koa-router": "^10.1.1",
+    "koa2-swagger-ui": "^5.3.0",
+    "log4js": "^6.3.0",
+    "nodemon": "^2.0.14",
+    "swagger-jsdoc": "^6.1.0",
+    "swagger-ui-express": "^4.2.0",
+    "swagger2": "^3.0.0",
+    "swagger2-koa": "^0.0.41",
+    "ts-node": "^10.4.0",
     "uuid": "8.3.2",
     "yamljs": "0.3.0"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.16.3",
+    "@types/koa": "^2.13.4",
+    "@types/koa-bodyparser": "^5.0.2",
+    "@types/koa-json": "^2.0.20",
+    "@types/koa-log4": "^2.3.3",
+    "@types/koa-logger": "^3.1.2",
+    "@types/koa-morgan": "^1.0.5",
+    "@types/koa-router": "^7.4.4",
+    "@types/node": "^16.11.12",
+    "@types/uuid": "^8.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
     "chai": "4.3.4",
     "debug": "4.3.2",
     "dirty-chai": "2.0.1",
-    "eslint": "8.2.0",
+    "eslint": "^8.2.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-import": "2.25.3",
@@ -66,6 +96,8 @@
     "lint-staged": "12.0.3",
     "nodemon": "2.0.15",
     "prettier": "2.4.1",
-    "supertest": "6.1.6"
+    "supertest": "6.1.6",
+    "typedoc": "^0.22.10",
+    "typescript-eslint-parser": "^22.0.0"
   }
 }
