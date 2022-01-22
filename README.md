@@ -8,47 +8,142 @@
 ## Downloading
 
 ```
-git clone https://github.com/SashaGulnov/nodejs2021Q4-service.git
+git clone {repository URL}
 ```
 
-## Installing node and postgres
+## Installing NPM modules
 
 ```
-docker pull node:alpine
-docker pull postgres
+npm install
 ```
 
-## Create own images
+## Running application
 
 ```
-docker-compose build
-```
-
-## Run project
-
-```
-docker-compose up
+npm start
 ```
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
+For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
-- For `User`, `Board` and `Task` REST endpoints with separate router paths should be created
-  - `User` (`/users` route)
-    - `GET /users` - get all users (remove password from response)
-    - `GET /users/:userId` - get the user by id (ex. “/users/123”) (remove password from response)
-    - `POST /users` - create user
-    - `PUT /users/:userId` - update user
-    - `DELETE /users/:userId` - delete user
-  - `Board` (`/boards` route)
-    - `GET /boards` - get all boards
-    - `GET /boards/:boardId` - get the board by id
-    - `POST /boards` - create board
-    - `PUT /boards/:boardId` - update board
-    - `DELETE /boards/:boardId` - delete board
-  - `Task` (`boards/:boardId/tasks` route)
-    - `GET boards/:boardId/tasks` - get all tasks
-    - `GET boards/:boardId/tasks/:taskId` - get the task by id
-    - `POST boards/:boardId/tasks` - create task
-    - `PUT boards/:boardId/tasks/:taskId` - update task
-    - `DELETE boards/:boardId/tasks/:taskId` - delete task
+## Running application in Docker
+
+```
+npm run dev:docker 
+```
+or
+
+```
+docker-compose up --build
+```
+
+You should wait while the containers -app and -postgres run in development mode;
+
+```
+docker exec -i -t app /bin/bash
+```
+
+You can get into -app container with this command
+
+```
+docker stop app postgres
+```
+
+This command stop -app and -postgres containers
+
+```
+docker rm app postgres
+```
+
+This command delete -app and -postgres containers
+
+## Testing
+
+After application running open new terminal and enter:
+
+To run all tests without authorization
+
+```
+npm test
+```
+
+To run only one of all test suites (users, boards or tasks)
+
+```
+npm test <suite name>
+```
+
+To run all test with authorization
+
+```
+npm run test:auth
+```
+
+To run only specific test suite with authorization (users, boards or tasks)
+
+```
+npm run test:auth <suite name>
+```
+
+## Development
+
+If you're using VSCode, you can get a better developer experience from integration with [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extensions.
+
+### Auto-fix and format
+
+```
+npm run lint
+```
+
+### Debugging in VSCode
+
+Press <kbd>F5</kbd> to debug.
+
+For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+
+
+### Logging level in environment variable;
+
+You can manage Logging level by environment variable (LOG_LEVEL in .env)
+Set this **LOG_LEVEL** number from 0 to 5 to the desired logging level.
+In order of priority, available levels are:
+
+0. 'fatal'
+1. 'error'
+2. 'warn'
+3. 'info'
+4. 'debug'
+5. 'trace'
+
+Example: logger.level = 'info'
+The logging level is a minimum level. For instance if logger.level is 'info' then all 'fatal', 'error', 'warn', and 'info' logs will be enabled.
+
+You can pass 'silent' to disable logging:
+where **LOG_LEVEL** > 5 or no specify
+
+### Migrations for data base
+
+```
+npm run entity:create <entity name>
+```
+
+To create class for typerom entity
+
+```
+npm run migrate:generate
+```
+
+To generate migration for database
+
+```
+npm run migrate:run
+```
+
+To run current migration in database
+
+```
+npm run migrate:revert
+```
+Return to the previos migration state
+
