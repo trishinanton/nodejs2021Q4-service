@@ -1,61 +1,79 @@
-import { v4 as uuidv4 } from 'uuid';
-import {taskStore,userStore} from '../../db/store';
-import {userIdToNull} from '../../utils/helper';
-import { User } from '../../types/User.type';
+import { getRepository } from 'typeorm';
+import Boom from '@hapi/boom';
+import {IUserData, ICreatedUserData} from '../helpers/interfaces';
+import Logger from '../../logger';
+import { Users } from '../../entity/users.entity';
 
-/**
- * Returns array of Users
- * @returns Promise of array Users
- */
-export const getAllUsers = async():Promise<User[]> => userStore;
+export default class UserMemoryRepository {
+  /**
+   * Returns all users
+   * @returns Promise resolved user array
+   */
+  public static getAllUsers = async (): Promise<Array<IUserData> | []> => {
+    const repo = getRepository(Users);
+    const allUsers = await repo.find();
+    return allUsers;
+  };
 
-/**
- * Returns User by id
- * @param id - id of User
- * @returns Promise of User or undefined
- */
-export const getUserById = async(id:string):Promise<User | undefined> => userStore.find(user => user.id === id)
+  /**
+   * Returns an existing user based on identifier
+   * @param id user identifier
+   * @returns Promise resolved user data or throw error with status code 404
+   */
+  public static getUserById = async (id: string): Promise<IUserData | never> => {
+    const repo = getRepository(Users);
+    const userItem = await repo.findOne({ where: { id } });
+    if (userItem !== undefined) {
+      return userItem;
+    }
+    Logger.logError('clientError', 'getUserById', `User with id=${id} not found`, 404);
+    throw Boom.notFound(`User with id=${id} not found`);
+  };
 
-/**
- * Returns new created User
- * @param user - User object for creating User in store
- * @returns Promise of User
- */
-export const createUser = async(user:User):Promise<User> => {
-  const newUser = { id: uuidv4(), ...user};
-  userStore.push(newUser);
-  return newUser;
+  /**
+   * Returns an updated user based on identifier
+   * @param id user identifier
+   * @param data new user data
+   * @returns Promise resolved an updated user data or throw error with status code 404
+   */
+  public static updateUserById = async (id: string, data: IUserData): Promise<IUserData | never> => {
+    const repo = getRepository(Users);
+    const userToUpdate = await repo.findOne(id);
+    if (userToUpdate !== undefined) {
+      await repo.update(id, data);
+      const updatedUser = await repo.findOne(id) as IUserData;
+      return updatedUser;
+    }
+    Logger.logError('clientError', 'updateUserById', `User with id=${id} not found`, 404);
+    throw Boom.notFound(`User with id=${id} not found`);
+  };
+
+  /**
+   * Returns a newly created user data
+   * @param user new user data
+   * @returns Promise resolved a newly created user data
+   */
+  public static createUser = async (user: ICreatedUserData): Promise<IUserData> => {
+    const repo = getRepository(Users);
+    const newUser = repo.create(user);
+    await repo.save(newUser);
+    return newUser;
+  };
+
+  /**
+   * Remove an existing user from database based on user identifier
+   * @param id identifier of user
+   * @returns Promise resolved no data or throw error with status code 404
+   */
+  public static removeUserById = async (id: string): Promise<void | never> => {
+    const repo = getRepository(Users);
+    const deletedUser = await repo.findOne({ where: { id } });
+    if (deletedUser !== undefined) {
+      await repo.delete(id);
+    }
+    else {
+      Logger.logError('clientError', 'removeUserById', `User with id=${id} not found`, 404);
+      throw Boom.notFound(`User with id=${id} not found`);
+    }
+  };
 }
-
-/**
- * Returns updated User by id
- * @param user - User object for updating User in store by id
- * @param id - id of User
- * @returns Promise of User or undefined
- */
-export const updateUserById = async(user:User, id :string):Promise<User | undefined> => {
-  const index = userStore.findIndex(item => item.id === id);
-  let updatedUser:User | undefined;
-  if (index !== -1) {
-    updatedUser = { ...userStore[index], ...user };
-    userStore.splice(index, 1, updatedUser);
-  }
-  return updatedUser;
-}
-
-/**
- * Returns deleted User by id & change userId of deleted User's tasks to null
- * @param id - id of User
- * @returns Promise of boolean
- */
-export const deleteUserById = async(id :string):Promise<boolean> => {
-  const index = userStore.findIndex(user => user.id === id);
-  if (index === -1) {
-    return false;
-  }
-  userIdToNull(taskStore,id);
-  return true;
-}
-
-
-

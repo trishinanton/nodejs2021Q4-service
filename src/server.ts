@@ -1,38 +1,22 @@
-import { createConnection } from "typeorm";
-import {config} from './common/config'
-import ormconfig  from "./common/ormconfig";
-import app from './app';
-import logger from './common/logger';
+import createServer from './app';
+import Logger from './logger';
 
-const connection = createConnection(ormconfig);
-/**
- * Staring listen server on current port
- */
-
-const start = async () => {
-  try {
-    await app.listen(config.PORT, config.BACKEND_HOST, () =>
-    logger.info(`App is running on ${config.BACKEND_HOST}: ${config.PORT} and logger level: ${config.LOG_LEVEL}`)
-  )
-  } catch (error) {
-    logger.error(error)
-    process.exit(1)
-  }
-}
-
-connection.then(()=>{
-  logger.info("DB was Connected");
-  start()},
-  error => logger.error(error.message));
-
-process.on("unhandledRejection", (reason:unknown, promise:Promise<unknown>): void => {
-  logger.fatal("Unexpected exception occured", { reason, ex: promise });
-  process.exit(1);
-})
-
-process.on("uncaughtException", error => {
-  logger.fatal(error.message);
+// Catch unhandling unexpected exceptions
+process.on('uncaughtException', (error: Error, origin: string): void => {
+  Logger.logProcessError(origin, error.message);
   process.exit(1);
 });
 
-export default connection;
+// uncomment code below to test 'uncaughtException'
+// throw Error('Oops!');
+
+// Catch unhandling rejected promises
+process.on('unhandledRejection', (reason: {message: string}): void => {
+  Logger.logProcessError('unhandledRejection', reason.message);
+  process.exit(1);
+});
+
+// uncomment code below to test 'unhandledRejection'
+// Promise.reject(Error('Oops!'));
+
+createServer();

@@ -1,22 +1,31 @@
-import { FastifyInstance } from 'fastify';
-import { getBoards, getBoard, postBoard, putBoard, deleteBoard } from './board.service';
+import boardRouterOptions from './board.router.options';
 
-/**
- * Handle endpoints for boardRouter
- * @param app - instance of fastify from fastify package
- */
-const boardRouter = async(app:FastifyInstance):Promise<void> =>{
-  
-  app.get('/boards', getBoards)
-
-  app.get('/boards/:boardId', getBoard)
-
-  app.post('/boards', postBoard)
-
-  app.delete('/boards/:boardId', deleteBoard)
-
-  app.put('/boards/:boardId', putBoard)
-
+const boardRouter = {
+  getAllBoards: {
+    method: 'GET',
+    path: '/boards',
+    options: boardRouterOptions.getAllBoards
+  },
+  getBoardById: {
+    method: 'GET',
+    path: '/boards/{boardId}',
+    options: boardRouterOptions.getBoard
+  },
+  updateBoardById: {
+    method: 'PUT',
+    path: '/boards/{boardId}',
+    options: boardRouterOptions.updateBoard
+  },
+  createBoard: {
+    method: 'POST',
+    path: '/boards',
+    options: boardRouterOptions.createBoard
+  },
+  deleteBoardById: {
+    method: 'DELETE',
+    path: '/boards/{boardId}',
+    options: boardRouterOptions.deleteBoard
+  }
 }
 
 export default boardRouter;

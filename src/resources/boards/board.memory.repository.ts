@@ -1,62 +1,80 @@
-import { v4 as uuidv4 } from 'uuid';
-import {taskStore, boardStore}from '../../db/store';
-import {deletTasksWithBoard} from '../../utils/helper';
-import { Board } from '../../types/Board.type';
+import Boom from '@hapi/boom';
+import { getRepository } from 'typeorm';
+import { IBoardData, IBoardDataBasic } from '../helpers/interfaces';
+import Logger from '../../logger';
+import { Boards } from '../../entity/boards.entity';
 
-/**
- * Returns array of Boards
- * @returns Promise of array of Boards
- */
-export const getAllBoards = async():Promise<Board[]> => boardStore;
+export default class BoardMemoryRepository {
+  /**
+   * Returns an array of all boards
+   * @returns Promise resolved an array of all boards
+   */
+  public static getAllBoards = async (): Promise<Array<IBoardData> | []>  => {
+    const repo = getRepository(Boards);
+    const allBoards = await repo.find();
+    return allBoards;
+  };
 
-/**
- * Returns Board by Id
- * @param id - id of Board
- * @returns Promise of Board or undefined
- */
-export const getBoardById = async(id:string):Promise<Board | undefined> => boardStore.find(board => board.id === id)
-
-/**
- * Returns new created Board
- * @param board - Board object for creating Board in store
- * @returns Promise of Board
- */
-export const createBoard = async(board:Board):Promise<Board> => {
-  const newBoard = { ...board, id: uuidv4()};
-  boardStore.push(newBoard);
-  return newBoard;
-}
-
-/**
- * Returns updated Board by Id
- * @param board - Board object for updating Board in store by id
- * @param id - id of Board
- * @returns Promise of Board or undefined
- */
-export const updateBoardById = async(board:Board, id:string):Promise<Board | undefined> => {
-  const index = boardStore.findIndex(item => item.id === id);
-  let updatedBoard:Board | undefined;
-  if (index !== -1) {
-    updatedBoard = { ...boardStore[index], ...board };
-    boardStore.splice(index, 1, updatedBoard);
+  /**
+   * Returns a board data based on the identifier
+   * @param id identifier of board
+   * @returns Promise resolved a board data or throw error with status code 404
+   */
+  public static getBoardById = async (id: string): Promise<IBoardData | never> => {
+    const repo = getRepository(Boards);
+    const board = await repo.findOne({ where: { id } });
+    if (!board) {
+      Logger.logError('clientError', 'getBoardById', `Board with id=${id} not found`, 404);
+      throw Boom.notFound(`Board with id=${id} not found`);
+    }
+    return board;
   }
-  return updatedBoard;
+
+  /**
+   * Returns an updated board data based on identifier
+   * @param id identifier of board
+   * @param data new data for existing board
+   * @returns Promise resolved an updated board data or throw error with status code 404
+   */
+  public static updateBoardById = async (id: string, data: IBoardData): Promise<IBoardData | never> => {
+    const repo = getRepository(Boards);
+    const boardToUpdate = await repo.findOne({ where: { id } });
+    if (boardToUpdate !== undefined) {
+      const updatedBoardData = Object.assign(boardToUpdate, data);
+      await repo.save(updatedBoardData);
+      return updatedBoardData;
+    }
+    Logger.logError('clientError', 'updateBoardById', `Board with id=${id} not found`, 404);
+    throw Boom.notFound(`Board with id=${id} not found`);
+
+  };
+
+  /**
+   * Returns a newly created board data
+   * @param board new board data
+   * @returns Promise resolved a newly created board data
+   */
+  public static createBoard = async (board: IBoardDataBasic): Promise<IBoardData> => {
+    const repo = getRepository(Boards);
+    const newBoard = repo.create(board);
+    await repo.save(newBoard);
+    return newBoard;
+  };
+
+  /**
+   * Remove an existing board from database based on identifier
+   * @param id identifier of board
+   * @returns Promise resolved no data or throw error with status code 404
+   */
+  public static removeBoardById = async (id: string): Promise<void | never> => {
+    const repo = getRepository(Boards);
+    const deletedBoard = await repo.findOne({ where: { id } });
+    if (deletedBoard !== undefined) {
+      await repo.delete(id)
+    }
+    else {
+      Logger.logError('clientError', 'removeBoardById', `Board with id=${id} not found`, 404);
+      throw Boom.notFound(`Board with id=${id} not found`);
+    }
+  };
 }
-
-/**
- * Returns deleted Board by id & delete all tasks on deleted Board
- * @param id - id of Board
- * @returns Promise boolean
- */
-export const deleteBoardById = async(id:string):Promise<boolean> => {
-  const indexDeletedBoard = boardStore.findIndex(board => board.id === id);
-  if (indexDeletedBoard === -1) {
-    return false;
-  }
-  deletTasksWithBoard(taskStore,id)
-  return true;
-}
-
-
-
-
