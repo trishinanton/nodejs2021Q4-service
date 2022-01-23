@@ -1,6 +1,8 @@
 {
-  "watch": "src/**/*.ts",
+  "verbose": true,
+  "watch": ["src"],
+  "ext": "ts",
   "execMap": {
-    "ts": "ts-node"
+    "ts": "node --inspect=0.0.0.0:9229 --nolazy -r ts-node/register"
   }
 }

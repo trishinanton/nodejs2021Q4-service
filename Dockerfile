@@ -1,11 +1,11 @@
-FROM node:alpine
+FROM node:16.13-alpine
 
-WORKDIR /app
+WORKDIR /hapi-server
 
-COPY package*.json /app
+COPY package-docker.json ./package.json
 
-RUN npm install
+RUN npm install --production
 
 COPY . .
 
-CMD ["npx", "nodemon", "--exec", "npx", "ts-node", "src/server.ts"]
+CMD ["nodemon", "src/server.ts", "development", "--exitcrash", "-L"]
